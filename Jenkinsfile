@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -15,34 +16,47 @@ pipeline {
             }
         }
         
-        stage('Build spboot') {
+        stage('git checkout') {
             steps {
                 // Get some code from a GitHub repository
                 git 'https://github.com/ayushpratapsingh/spbmavenexample.git'
-
-                // Run Maven on a Unix agent.
-                sh "mvn -Dmaven.test.failure.ignore=true clean package"
-
-                // To run Maven on a Windows agent, use
-                // bat "mvn -Dmaven.test.failure.ignore=true clean package"
+                
             }
         }
-            
-        stage("archive as war")
-        {
-            steps{
-            archiveArtifacts artifacts: 'target/*.war', followSymlinks: false
-            }
-            
-        }
-        stage("deploy to container"){
-            steps{
-            
-                deploy adapters: [tomcat9(credentialsId: 'tomcatads', path: '', url: 'http://18.212.202.239:8080/')], contextPath: 'hellocp', war: 'target/*.war'
-            }
-            }
         
-            
+        stage('compile sc') {
+            steps {
+               sh "mvn compile"
+            }
+        }  
+        
+        stage('test sc') {
+            steps {
+               sh "mvn test"
+               }
         }
-            
+        
+        stage('package sc') {
+            steps {
+               sh "mvn clean package"
+            }
         }
+        
+        stage('Deploy war') {
+            steps {
+                deploy adapters: [tomcat9(credentialsId: 'tomcatads', path: '', url: 'http://18.215.149.126:8080/')], contextPath: 'myapp', onFailure: false, war: 'target/*.war'
+             }
+        }  
+        
+    }
+    post {
+
+        success {
+
+            archiveArtifacts artifacts: 'target/*.war'  // Example: archive all .jar files in the 'target' folder
+
+        }
+
+    }
+            
+}
