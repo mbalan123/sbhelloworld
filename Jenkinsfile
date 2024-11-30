@@ -19,7 +19,9 @@ pipeline {
         stage('git checkout') {
             steps {
                 // Get some code from a GitHub repository
-                git 'https://github.com/ayushpratapsingh/spbmavenexample.git'
+                //git branch "feature" 'https://github.com/ayushpratapsingh/spbmavenexample.git'
+                  git branch: "feature", url: 'https://github.com/ayushpratapsingh/spbmavenexample.git' 
+
                 
             }
         }
